@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -18,7 +18,7 @@
                         <h2 class="accordion-header" :id="'heading' + item.ConsensusId" >
                             <button class="accordion-button" type="button" data-bs-toggle="collapse" :data-bs-target="'#book' + item.ConsensusId" aria-expanded="true" 
                                     :aria-controls="'book'  + item.ConsensusId" :style="{ color: '#' + СonsensusColor[index].hex}" style="font-weight:bold;">
-                                {{item.ConsensusName}} {{item.ConsensusValueMin}} - {{item.ConsensusValueMax}}
+                                {{item.ConsensusName}} {{item.ConsensusValueMin}}-{{item.ConsensusValueMax}}%
                             </button>
                         </h2>
                         <div :id="'book' + item.ConsensusId" class="accordion-collapse collapse show" :aria-labelledby="'heading' + item.ConsensusId" data-bs-parent="#accordionExample">
@@ -38,7 +38,7 @@
                                             <th scope="row">{{thesis.ThesisId}}</th>
                                             <td>{{thesis.Description}} <span title="Число последователей тезиса" class="badge bg-success">{{thesis.followersCount}}</span></td>
                                             <td>
-                                                Категория: 
+                                                Категория: <button class="btn btn-sm badge bg-secondary">{{thesis.CategoryName}}</button>&nbsp;
                                                 Теги:
                                                 <span v-for="tag in thesis.TagList"><button class="btn btn-sm badge bg-secondary">{{tag.Name}}</button>&nbsp;</span>
                                             </td>
