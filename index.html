@@ -1,0 +1,162 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>Главная страница</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+    <link href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div id="appT" class="col-md">
+                <br /><br />
+                <h4>Книга консенсуса</h4>
+                <div class="accordion" id="accordionExample">
+                    <div v-for="(item, index) in СonsensusThesisList" class="accordion-item">
+                        <h2 class="accordion-header" :id="'heading' + item.ConsensusId" >
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" :data-bs-target="'#book' + item.ConsensusId" aria-expanded="true" 
+                                    :aria-controls="'book'  + item.ConsensusId" :style="{ color: '#' + СonsensusColor[index].hex}" style="font-weight:bold;">
+                                {{item.ConsensusName}} {{item.ConsensusValueMin}} - {{item.ConsensusValueMax}}
+                            </button>
+                        </h2>
+                        <div :id="'book' + item.ConsensusId" class="accordion-collapse collapse show" :aria-labelledby="'heading' + item.ConsensusId" data-bs-parent="#accordionExample">
+                            <div class="accordion-body">
+                                <table class="table table-striped">
+                                    <!--<thead>
+                                        <tr>
+                                            <th scope="col">#</th>
+                                            <th scope="col">Тезис</th>
+                                            <th scope="col">Тэги</th>
+                                            <th scope="col">Ссылки</th>
+                                        </tr>
+                                    </thead>
+                                    -->
+                                    <tbody>
+                                        <tr v-for="thesis in item.ThesisList">
+                                            <th scope="row">{{thesis.ThesisId}}</th>
+                                            <td>{{thesis.Description}} <span title="Число последователей тезиса" class="badge bg-success">{{thesis.followersCount}}</span></td>
+                                            <td>
+                                                Категория: 
+                                                Теги:
+                                                <span v-for="tag in thesis.TagList"><button class="btn btn-sm badge bg-secondary">{{tag.Name}}</button>&nbsp;</span>
+                                            </td>
+                                            <td>{{thesis.Links}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@johmun/vue-tags-input/dist/vue-tags-input.js"></script>
+<script>
+    var appT = new Vue({
+        el: '#appT',
+        data: {
+            СonsensusThesisList:
+                [
+                    {
+                        "ConsensusValueMax": 100, "ConsensusValueMin": 95, "ConsensusName": "Сильный Консенсус", "ConsensusId" : 1,
+                        "ThesisList":
+                            [
+                                {
+                                    "ThesisId": 1, "UserId": 1, "Description": "Тезис 1", "Links": "Ссылка 1", "CategoryId": 1, "CategoryName": "Категория 1",
+                                    "followersCount": 1000001,
+                                    "TagList": [{ "TagId": 1, "Name": "Тэг1" }, { "TagId": 2, "Name": "Тэг2" }],
+                                },
+                                {
+                                    "ThesisId": 2, "UserId": 2, "Description": "Тезис 2", "Links": "Ссылка 2", "CategoryId": 1, "CategoryName": "Категория 2",
+                                    "followersCount": 33,
+                                    "TagList": [{ "TagId": 3, "Name": "Тэг3" }, { "TagId": 4, "Name": "Тэг4" }],
+                                },
+                            ]
+                    },
+                    {
+                        "ConsensusValueMax": 95, "ConsensusValueMin": 80, "ConsensusName": "Приблизительный Консенсус", "ConsensusId": 2,
+                        "ThesisList":
+                            [
+                                {
+                                    "ThesisId": 3, "UserId": 1, "Description": "Тезис 3", "Links": "Ссылка 1", "CategoryId": 1, "CategoryName": "Категория 1",
+                                    "followersCount": 1000001,
+                                    "TagList": [{ "TagId": 1, "Name": "Тэг1" }, { "TagId": 2, "Name": "Тэг2" }],
+                                },
+                                {
+                                    "ThesisId": 4, "UserId": 2, "Description": "Тезис 4", "Links": "Ссылка 2", "CategoryId": 1, "CategoryName": "Категория 2",
+                                    "followersCount": 33,
+                                    "TagList": [{ "TagId": 3, "Name": "Тэг3" }, { "TagId": 4, "Name": "Тэг4" }],
+                                },
+                            ]
+                    },
+                    {
+                        "ConsensusValueMax": 80, "ConsensusValueMin": 60, "ConsensusName": "Слабый Консенсус", "ConsensusId": 3,
+                        "ThesisList":
+                            [
+                                {
+                                    "ThesisId": 5, "UserId": 1, "Description": "Тезис 5", "Links": "Ссылка 1", "CategoryId": 1, "CategoryName": "Категория 1",
+                                    "followersCount": 1000001,
+                                    "TagList": [{ "TagId": 1, "Name": "Тэг1" }, { "TagId": 2, "Name": "Тэг2" }],
+                                },
+                                {
+                                    "ThesisId": 6, "UserId": 2, "Description": "Тезис 6", "Links": "Ссылка 2", "CategoryId": 1, "CategoryName": "Категория 2",
+                                    "followersCount": 33,
+                                    "TagList": [{ "TagId": 3, "Name": "Тэг3" }, { "TagId": 4, "Name": "Тэг4" }],
+                                },
+                            ]
+                    },
+                    {
+                        "ConsensusValueMax": 60, "ConsensusValueMin": 50, "ConsensusName": "Раскол", "ConsensusId": 4,
+                        "ThesisList":
+                            [
+                                {
+                                    "ThesisId": 7, "UserId": 1, "Description": "Тезис 7", "Links": "Ссылка 1", "CategoryId": 1, "CategoryName": "Категория 1",
+                                    "followersCount": 1000001,
+                                    "TagList": [{ "TagId": 1, "Name": "Тэг1" }, { "TagId": 2, "Name": "Тэг2" }],
+                                },
+                                {
+                                    "ThesisId": 8, "UserId": 2, "Description": "Тезис 8", "Links": "Ссылка 2", "CategoryId": 1, "CategoryName": "Категория 2",
+                                    "followersCount": 33,
+                                    "TagList": [{ "TagId": 3, "Name": "Тэг3" }, { "TagId": 4, "Name": "Тэг4" }],
+                                },
+                            ]
+                    },
+                    {
+                        "ConsensusValueMax": 50, "ConsensusValueMin": 0, "ConsensusName": "Не принято", "ConsensusId": 5,
+                        "ThesisList":
+                            [
+                                {
+                                    "ThesisId": 9, "UserId": 1, "Description": "Тезис 9", "Links": "Ссылка 1", "CategoryId": 1, "CategoryName": "Категория 1",
+                                    "followersCount": 1000001,
+                                    "TagList": [{ "TagId": 1, "Name": "Тэг1" }, { "TagId": 2, "Name": "Тэг2" }],
+                                },
+                                {
+                                    "ThesisId": 10, "UserId": 2, "Description": "Тезис 10", "Links": "Ссылка 2", "CategoryId": 1, "CategoryName": "Категория 2",
+                                    "followersCount": 33,
+                                    "TagList": [{ "TagId": 3, "Name": "Тэг3" }, { "TagId": 4, "Name": "Тэг4" }],
+                                },
+                            ]
+                    },
+
+                ],
+            СonsensusColor: [{ hex: '270' }, { hex: '570' }, { hex: 'a70' }, { hex: 'd70' }, { hex: 'f70' }],
+        },
+        computed: {
+        },
+        methods: {
+
+        }
+    });
+
+</script>
+
+
