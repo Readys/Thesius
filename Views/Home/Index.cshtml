@@ -1,0 +1,549 @@
+﻿@using Microsoft.AspNet.Identity
+@{
+    ViewBag.Title = "Главная";
+}
+
+@{
+    var userIdStr = User.Identity.GetUserId();
+    //userIdStr = userIdStr.Replace("-", "");
+
+}
+
+<div v-if="!Loading" id="loader" style="display:none;">
+    <loader object="#ff9633" color1="#ffffff" color2="#17fd3d" size="5" speed="2" bg="#343a40" objectbg="#999793" opacity="20" name="circular"></loader>
+</div>
+<div id="p_prldr"><div class="contpre"><span class="svg_anm"></span><br>Подождите<br><small>идет загрузка</small></div></div>
+
+<div class="container">
+    <div class="row">
+        <div id="appT" v-show="Loading" class="col-md">
+            <br />
+            <button @@Click="ThesisFormToggle()" type="button" class="btn btn-sm btn-success">Добавить тезис</button>
+            <br /><br />
+            <transition name="list">
+                <div v-show="ShowCreateThesis" class="modal-content col-md-4" style="width:50%; min-width:400px;">
+                    <div class="modal-header">
+                        <h6 class="modal-title" id="exampleModalLabel">{{ThesisInputText}}</h6>
+                        <button @@Click="ShowCreateThesis = !ShowCreateThesis" type="button" class="btn-close btn-sm" aria-label="Close"></button>
+                    </div>
+                    <form>
+                        <div class="modal-body">
+
+                            <div class="mb-3">
+                                <label class="form-label"><span style="color:red;">*</span>Содержание тезиса</label>
+                                <textarea v-model="ThesisInputText" v-on:keyup="countdown" class="form-control" id="exampleFormControlTextarea1" rows="5"></textarea>
+                                <p class="text-end" v-bind:class="{'text-danger': ThesisTextOverLoad }"><small>Осталось символов: {{remainingCount}}</small></p>
+                            </div>
+                            <div>
+                                <label for="exampleFormControlTextarea1" class="form-label"><span style="color:red;">*</span>Добавление тэгов (Первый тэг считается категорией):</label>
+                                <vue-tags-input v-model="tag"
+                                                :add-on-blur="false"
+                                                :tags="tags"
+                                                :autocomplete-items="autocompleteItems"
+                                                @@tags-changed="newTags => tags = newTags"
+                                                @@before-adding-tag="checkTag" />
+
+                            </div>
+                            <div class="mb-3">
+                                <label for="exampleFormControlTextarea1" class="form-label">Добавить ссылку:</label><br />
+                                <button @@click="AddLink()" class="btn btn-sm btn-success" type="button"><i class="fas fa-plus"></i></button>
+                                <template v-for="link in Links">
+                                    <br />
+                                    <br />
+                                    <label class="form-label">Название ссылки:</label>
+                                    <input class="form-control" type="text" v-model="link.Name">
+                                    <label class="form-label">Тело ссылки:</label>
+                                    <input class="form-control" type="text" v-model="link.Body">
+                                </template>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" @@Click="ShowCreateThesis = !ShowCreateThesis" class="btn btn-sm btn-secondary">Close</button>
+                            <button v-if="!ThesisSaveLoad && !ThesisTextOverLoad" type="button" @@click="CreateThesis()" class="btn btn-sm btn-primary">
+                                Сохранить тезис
+                            </button>
+                            <button v-if="ThesisSaveLoad  && !ThesisTextOverLoad" class="btn btn-sm btn-primary" type="button" disabled>
+                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                Загрузка...
+                            </button>
+                            <span v-if="!ThesisSaveLoad  && ThesisTextOverLoad" id="example" class="d-inline-block" tabindex="0"
+                                  data-bs-toggle="tooltip" data-bs-placement="right" title="Превышен лимит объема текста в тезисе!">
+                                <button @@click="CreateThesis()" class="btn btn-sm btn-danger" type="button">Сохранить тезис</button>
+                            </span>
+                        </div>
+                    </form>
+                </div>
+            </transition>
+
+            <h4>Случайные тезисы на расмотрение</h4>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Тезис</th>
+                        <th scope="col">Категория и тэги</th>
+                        <th scope="col">Ссылки</th>
+                        <th scope="col">Оценка</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="thesis in RandomThesisList">
+                        <th scope="row">{{thesis.ThesisId}}</th>
+                        <td>{{thesis.Description}}</td>
+                        <td>
+                            Категория: <span class="badge bg-primary">{{thesis.CategoryName}}</span> Теги:
+                            <span v-for="tag in thesis.TagList"><button class="btn btn-sm badge bg-secondary">{{tag.Name}}</button>&nbsp;</span>
+                        </td>
+                        <td>{{thesis.Links}}</td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-success"><i class="fas fa-plus"></i></button>
+                            <button type="button" class="btn btn-sm btn-danger"><i class="fas fa-minus"></i></button>
+                        </td>
+                    </tr>
+
+                </tbody>
+            </table>
+            <br />
+            @*<h4>Запущенные мной тезисы</h4>*@
+            <div class="accordion" id="accordionExample">
+                @*<div v-for="item in CategoryMyThesisList" class="accordion-item">
+                <h2 class="accordion-header" id="headingOne">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" :data-bs-target="'#collapse' + item.CategoryId" aria-expanded="false" :aria-controls="'collapse'  + item.CategoryId">
+                        {{item.CategoryName}}
+                    </button>
+                </h2>
+                <div :id="'collapse' + item.CategoryId" class="accordion-collapse collapse" :aria-labelledby="'heading' + item.CategoryId" data-bs-parent="#accordionExample">
+                    <div class="accordion-body">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Тезис</th>
+                                    <th scope="col">Тэги</th>
+                                    <th scope="col">Ссылки</th>
+                                    <th scope="col">Управление</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="thesis in item.ThesisList">
+                                    <th scope="row">{{thesis.ThesisId}}</th>
+                                    <td>{{thesis.Description}} <span title="Число последователей тезиса" class="badge bg-success">{{thesis.followersCount}}</span></td>
+                                    <td>
+                                        Теги:
+                                        <span v-for="tag in thesis.TagList"><button class="btn btn-sm badge bg-secondary">{{tag.Name}}</button>&nbsp;</span>
+                                    </td>
+                                    <td>{{thesis.Links}}</td>
+                                    <td>
+                                        <button type="button" class="btn btn-sm btn-success"><i class="fas fa-edit"></i></button>
+                                        <button type="button" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>*@
+            </div>
+            <br />
+            <h4>Личная книга собраных тезисов</h4>
+            <div class="accordion" id="accordionExample">
+                <div v-for="(item, index) in CategoryMyThesisBookList" class="accordion-item">
+                    <h2 class="accordion-header" id="headingOne">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" :data-bs-target="'#book' + item.CategoryId" aria-expanded="false" :aria-controls="'book'  + item.CategoryId">
+                            {{item.CategoryName}}
+                        </button>
+                    </h2>
+                    <div :id="'book' + item.CategoryId" class="accordion-collapse collapse" :aria-labelledby="'heading' + item.CategoryId" data-bs-parent="#accordionExample">
+                        <div class="accordion-body">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">#</th>
+                                        <th scope="col">Тезис</th>
+                                        <th scope="col">Тэги</th>
+                                        <th scope="col">Ссылки</th>
+                                        <th width="150" scope="col">Управление</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="(item2, index2) in item.ViewThesis">
+                                        <th>{{item2.Thesis.ThesisId}}</th>
+                                        <td>{{item2.Thesis.Description}} <span title="Число последователей тезиса" class="badge bg-success">{{item2.Thesis.followersCount}}</span></td>
+                                        <td>
+                                            <span v-for="tag in item2.Tags"><button class="btn btn-sm badge bg-secondary">{{tag.text}}</button>&nbsp;</span>
+                                        </td>
+                                        <td><span v-for="link in item2.Links"><button class="btn btn-sm badge bg-secondary">{{link.text}}</button>&nbsp;</span></td>
+                                        <td>
+                                            <button @@click="" type="button" class="btn btn-sm btn-success"><i class="fas fa-edit"></i></button>
+                                            <button @@click="MinusThesis(index, index2, item2.Thesis.ThesisId)" type="button" class="btn btn-sm btn-danger"><i class="fas fa-minus"></i></button>
+                                            <button @@click="TrashThesis(index, index2, item2.Thesis.ThesisId)" type="button" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<style>
+    #p_prldr {
+        position: fixed;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        background: #9A12B3;
+        z-index: 30;
+    }
+
+    .contpre small {
+        font-size: 25px;
+    }
+
+    .contpre {
+        width: 250px;
+        height: 100px;
+        position: absolute;
+        left: 50%;
+        top: 48%;
+        margin-left: -125px;
+        margin-top: -75px;
+        color: #fff;
+        font-size: 40px;
+        letter-spacing: -2px;
+        text-align: center;
+        line-height: 35px;
+    }
+
+    #p_prldr .svg_anm {
+        position: absolute;
+        width: 41px;
+        height: 41px;
+        background: url(/Content/img/pufff.svg) center center no-repeat;
+        background-size: 41px;
+        margin: -16px 0 0 -16px;
+    }
+    /*.list-enter,
+    .list-leave-to {
+        visibility: hidden;
+        height: 0;
+        margin: 0;
+        padding: 0;
+        opacity: 0;
+    }
+
+    .list-enter-active,
+    .list-leave-active {
+        transition: all 0.7s;
+    }*/
+</style>
+
+<script src="~/Scripts/jquery-3.3.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous"></script>
+<script src="~/Scripts/moduls/vue-tags-input.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js" integrity="sha512-bZS47S7sPOxkjU/4Bt0zrhEtWx0y0CRkhEp8IckzK+ltifIIE9EMIMTuT/mEzoIMewUINruDBIR/jJnbguonqQ==" crossorigin="anonymous"></script>
+@*<script src="https://cdnjs.cloudflare.com/ajax/libs/vue-select/3.10.8/vue-select.js"></script>*@
+<script src="~/Scripts/moduls/loader.js"></script>
+
+<script type="text/javascript">
+    $(window).on('load', function () {
+        var $preloader = $('#p_prldr'),
+            $svg_anm = $preloader.find('.svg_anm');
+        $svg_anm.fadeOut();
+        $preloader.delay(500).fadeOut('slow');
+    });
+</script>
+
+<script>
+    //$("#appT").hide();
+
+    function checkEmptyObj(obj) {
+        for (var i in obj) return false;
+        return true;
+    }
+    Vue.use(loader);
+
+    new Vue({
+        el: '#loader',
+        components: {
+            loader: loader
+        },
+        data: {
+            Loading: false,
+        },
+    });
+
+</script>
+<script>
+
+    Vue.component('vue-tags-input');
+
+    var appT = new Vue({
+        el: '#appT',
+        data: {
+            userId:  @Html.Raw(Json.Encode(userIdStr)),
+            RandomThesisList: [{
+                "ThesisId": 1, "UserId": 1, "Description": "Мы за все хорошее и против всего плохого", "Links": "Ссылка 1", "CategoryId": 1, "CategoryName": "Категория 1",
+                "followersCount": 1000001,
+                "TagList": [{ "TagId": 1, "Name": "Тэг1" }, { "TagId": 2, "Name": "Тэг2" }],
+            },
+            {
+                "ThesisId": 2, "UserId": 2, "Description": "Облака белокрылые лошадки", "Links": "Ссылка 2", "CategoryId": 2, "CategoryName": "Категория 2",
+                "followersCount": 33,
+                "TagList": [{ "TagId": 3, "Name": "Тэг3" }, { "TagId": 4, "Name": "Тэг4" }],
+            },
+            ],
+            MyThesisList: [{
+                "ThesisId": 1, "UserId": 1, "Description": "Мы за все хорошее и против всего плохого", "Links": "Ссылка 1", "CategoryId": 1, "CategoryName": "Категория 1",
+                "followersCount": 1000001,
+                "TagList": [{ "TagId": 1, "Name": "Тэг1" }, { "TagId": 2, "Name": "Тэг2" }],
+            },
+            {
+                "ThesisId": 2, "UserId": 2, "Description": "Пусть всегда будет солнце", "Links": "Ссылка 2", "CategoryId": 1, "CategoryName": "Категория 2",
+                "followersCount": 33,
+                "TagList": [{ "TagId": 3, "Name": "Тэг3" }, { "TagId": 4, "Name": "Тэг4" }],
+            },
+            ],
+            CategoryMyThesisList: [
+                {
+                    "CategoryId": 1, "CategoryName": "Категория 1",
+                    "ThesisList":
+                        [
+                            {
+                                "ThesisId": 1, "UserId": 1, "Description": "Тезис 1", "Links": "Ссылка 1", "followersCount": 6576,
+                                "TagList": [{ "TagId": 1, "Name": "Тэг1" }, { "TagId": 2, "Name": "Тэг2" }],
+                            },
+                            {
+                                "ThesisId": 2, "UserId": 2, "Description": "Тезис 2", "Links": "Ссылка 2", "followersCount": 9878,
+                                "TagList": [{ "TagId": 3, "Name": "Тэг3" }, { "TagId": 4, "Name": "Тэг4" }],
+                            },
+                        ]
+                },
+                {
+                    "CategoryId": 2, "CategoryName": "Категория 2",
+                    "ThesisList":
+                        [
+                            {
+                                "ThesisId": 3, "UserId": 1, "Description": "Тезис 3", "Links": "Ссылка 1", "followersCount": 6576,
+                                "TagList": [{ "TagId": 1, "Name": "Тэг1" }, { "TagId": 2, "Name": "Тэг2" }],
+                            },
+                            {
+                                "ThesisId": 4, "UserId": 2, "Description": "Тезис 4", "Links": "Ссылка 2", "followersCount": 5637,
+                                "TagList": [{ "TagId": 3, "Name": "Тэг3" }, { "TagId": 4, "Name": "Тэг4" }],
+                            },
+                        ]
+                },
+            ],
+            CategoryMyThesisBookList: [],
+            tag: '',
+            tags: [],
+            autocompleteItems: [],
+            debounce: null,
+            ThesisInputText: "",
+            ShowCreateThesis: false,
+            ThesisSaveLoad: false,
+            maxCount: 512,
+            remainingCount: 512,
+            ThesisTextOverLoad: false,
+            //inputCategory: "",
+            //CategoryThesisId: 0,
+            Links: [],
+            ShowFieldLinks: false,
+            Loading:false,
+        },
+        watch: {
+            'tag': 'initItems',
+        },
+        computed: {
+        },
+        methods: {
+            TestMail: function () {
+                axios
+                    .get('/JSON/TestMail/')
+                    .then(response => (alert(response)));
+            },
+            MinusThesis: function (index, index2, id) {
+                $("#loader").show();
+                axios.post('/JSON/MinusThesis/', {
+                    thesisId: id, 
+                }, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    }).then(response => {// Возвращать ThesisId
+                        if (response.data == "Ok") {
+                            this.CategoryMyThesisBookList[index].ViewThesis.splice(index2, 1);
+                        }
+                        //Разблокировка
+                        $("#loader").hide();
+                    }).catch(error => {
+                        $("#loader").hide();
+                        alert('Error');
+                        //Разблокировка
+                    });
+            },
+            TrashThesis: function (index, index2, id) {
+                $("#loader").show();
+                axios.post('/JSON/TrashThesis/', {
+                    thesisId: id,
+                }, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    }).then(response => {// Возвращать ThesisId
+                        if (response.data == "Ok") {
+                            this.CategoryMyThesisBookList[index].ViewThesis.splice(index2, 1);
+                        }
+                        //Разблокировка
+                        $("#loader").hide();
+                    }).catch(error => {
+                        $("#loader").hide();
+                        alert('Error');
+                        //Разблокировка
+                    });
+            },
+            AddLink: function () {
+                this.Links.push({
+                    Name: "", Body: ""
+                });
+            },
+            ThesisFormToggle: function () {
+                this.ShowCreateThesis = !this.ShowCreateThesis;
+            },
+            checkTag(obj) {
+                var typeTag = 1;
+                if (this.tags.length == 0) { typeTag = 0; }
+                $("#loader").show();
+                axios.post('/JSON/CreateTag/', { userId: this.userId, name: obj.tag.text, typeTag: typeTag, }, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                }).then(response => {
+                    if (response.data > 0) {
+                        //alert("Тэг добавлен с id " + response.data);
+                        this.tags.push(
+                            { text: this.tag, tagId: response.data }
+                        );
+                        this.tag = "";
+                        $("#loader").hide();
+                    } else if (response.data == -1) {
+                        obj.addTag();
+                        this.tag = "";
+                        $("#loader").hide();
+                    }
+                }).catch(error => {
+                    alert('Error');
+                    $("#loader").hide();
+                });
+            },
+            initItems() {
+                if (this.tag.length < 2) return;
+                //const url = `https://itunes.apple.com/search?term=
+                //${this.tag}&entity=allArtist&attribute=allArtistTerm&limit=6`;
+                var typeTag = 1;
+                if (this.tags.length == 0) { typeTag = 0; }
+                clearTimeout(this.debounce);
+                this.debounce = setTimeout(() => {
+                    $("#loader").show();
+                    axios.post('/JSON/GetSimularTag/', { search: this.tag, typeTag: typeTag }).then(response => {//
+                        this.autocompleteItems = response.data.tags.map(a => {
+                            return { text: a.Name, tagId: a.TagId };//tagId: a.TagId,
+                        });
+                        $("#loader").hide();
+                    }).catch(() => console.warn('Ой! Что-то пошло не так!'));
+                }, 600);
+                $("#loader").hide();
+            },
+            CreateThesis: function (CategoryId, Text, Tags) {
+                // Блокировка
+                if (this.tags.length < 2) {
+                    return alert("Должно быть как минимум два элемента в поле Тэгов!");
+                }
+
+                if (this.ThesisInputText.length < 20) {
+                    return alert("Должно быть больше 20 символов в тексте тезиса");
+                }
+
+                this.ThesisSaveLoad = !this.ThesisSaveLoad;
+
+                var catId = this.tags[0].tagid;
+                var catName = this.tags[0].text
+                //this.tags.splice(0, 1);
+
+                if (!this.ThesisTextOverLoad) {
+                    axios.post('/JSON/CreateThesis/', {
+                        links: this.Links, userId: this.userId, categoryId: catId, categoryName: catName,
+                        description: this.ThesisInputText, tags: this.tags,
+                    }, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    }).then(response => {// Возвращать ThesisId
+                        if (response.data > 0) {
+                            this.ThesisSaveLoad = !this.ThesisSaveLoad;
+                            this.ClearForm();
+                            //this.ShowCreateThesis = false;
+                            // Вставлять новый тезис динамически в личные тезисы и личную книгу тезисов
+                            //this.ac[i].RecrTemplateMail.splice(i2, 1);
+                        }
+                        //Разблокировка
+                    }).catch(error => {
+                        this.ThesisSaveLoad = !this.ThesisSaveLoad;
+                        alert('Error');
+                        //Разблокировка
+                    });
+                } else {
+                    alert("Превышен лимит объема текста в тезисе!");
+                }
+
+            },
+            ClearForm: function () {
+                this.tag = '';
+                //this.tags = [];
+                this.Links = [];
+                this.ThesisInputText = "";
+                this.ThesisTextOverLoad = false;
+                this.ThesisSaveLoad = false;
+                this.ShowCreateThesis = false;
+            },
+            countdown: function () {
+                this.remainingCount = this.maxCount - this.ThesisInputText.length;
+                this.ThesisTextOverLoad = this.remainingCount < 0;
+            },
+        },
+        updated: function () {
+            if (this.ThesisTextOverLoad) {
+                var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+                var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                    return new bootstrap.Tooltip(tooltipTriggerEl)
+                });
+            }
+        },
+        mounted: function () {
+            $("#appT").show();
+            setTimeout(() => { $("#loader").hide(); }, 2000);
+
+            axios
+                .get('/JSON/GetThesisForMe/')
+                .then(response => (this.CategoryMyThesisBookList = response.data.categoryList));
+        },
+    });
+
+    //var appModal1 = new Vue({
+    //    el: '#CreateThesis',
+    //    data: {
+
+    //    },
+    //    computed: {
+    //    },
+    //    methods: {
+
+    //    }
+    //});
+</script>
