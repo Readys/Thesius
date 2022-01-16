@@ -47,3 +47,4 @@
 
 - [Демо структуры](https://readys.github.io/Thesius/)
 - [Определение консенсуса в Википедии](https://ru.wikipedia.org/wiki/%D0%9A%D0%BE%D0%BD%D1%81%D0%B5%D0%BD%D1%81%D1%83%D1%81)
+
