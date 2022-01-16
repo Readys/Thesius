@@ -1,0 +1,47 @@
+﻿
+@{
+    ViewBag.Title = Model.Description;
+}
+<br />
+<h2>@Model.Description</h2>
+<div id="appExport">
+    <label>Экспорт голосования по тезису:</label>
+    <textarea v-model="textExport"  class="form-control" id="Textarea1" rows="15"></textarea>
+    <br />
+    <button @@click.stop.prevent="Copy()" class="btn btn-sm btn-success">Копировать в буфер</button>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+<script>
+    var appExport = new Vue({
+        el: '#appExport',
+        data: {
+            thesis: @Html.Raw(Json.Encode(Model)),
+            textExport: "",
+        },
+        computed: {
+        },
+        methods: {
+            Copy() {
+
+                let testingCodeToCopy = document.querySelector('#Textarea1');
+                testingCodeToCopy.setAttribute('type', 'text');    
+                testingCodeToCopy.select();
+
+                try {
+                    var successful = document.execCommand('copy');
+                    var msg = successful ? 'successful' : 'unsuccessful';
+                    alert('Текст скопирован в буфер');
+                } catch (err) {
+                    alert('Ошибка копирования');
+                }
+
+            },
+        },
+        mounted: function ()  {
+            this.textExport = this.thesis.Description + "\n" + "Поддержать:" + "\n" + "https://thesius.ru/Home/ThesisDa?id=" + this.thesis.ThesisId + "\n" +
+                "Голосовать против:" + "\n" + "https://thesius.ru/Home/ThesisNet?id=" + this.thesis.ThesisId + "\n" + 
+                "Не понятно:" + "\n" + "https://thesius.ru/Home/ThesisNePonyatno?id=" + this.thesis.ThesisId;
+        }
+    });
+</script>
+

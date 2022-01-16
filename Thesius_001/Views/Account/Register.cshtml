@@ -1,0 +1,94 @@
+﻿@model Thesius_001.Models.RegisterViewModel
+@{
+    /**/
+
+    ViewBag.Title = "Регистрация";
+}
+
+<h2>@ViewBag.Title.</h2>
+
+@using (Html.BeginForm("Register", "Account", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+{
+    @Html.AntiForgeryToken()
+    <h4>Создать новый аккаунт.</h4>
+    <hr />
+    @Html.ValidationSummary("", new { @class = "text-danger" })
+    <div class="form-group">
+        @Html.LabelFor(m => m.Email, new { @class = "col-md-2 control-label" })
+        <div class="col-md-10">
+            @Html.TextBoxFor(m => m.Email, new { @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.NickName, new { @class = "col-md-2 control-label" })
+        <div class="col-md-10">
+            @Html.TextBoxFor(m => m.NickName, new { @class = "form-control" })
+        </div>
+    </div>
+    <div id="Code" class="form-group">
+        @Html.LabelFor(m => m.InviteCode, new { @class = "col-md-2 control-label" })
+        <span v-if="CheckInvite" style="color:green">Инвайткод валиден</span>
+        <div class="col-md-10">
+            <input @@change="CheckInviteCode()" v-model="InviteCode" class="form-control" name="InviteCode" type="text" value="">
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Password, new { @class = "col-md-2 control-label" })
+        <div class="col-md-10">
+            @Html.PasswordFor(m => m.Password, new { @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.ConfirmPassword, new { @class = "col-md-2 control-label" })
+        <div class="col-md-10">
+            @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <br />
+            <input type="submit" class="btn btn-sm btn-success" value="Зарегистрироваться" />
+        </div>
+    </div>
+    <div class="form-group">      
+        <div class="col-md-10">
+            <p>
+                Нажимая «Зарегистрироваться», Вы соглашаетесь с  <a href="/Home/PrivacyPolicy">политикой конфиденциальности</a>.
+            </p>
+        </div>
+    </div>
+
+}
+<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js" integrity="sha512-bZS47S7sPOxkjU/4Bt0zrhEtWx0y0CRkhEp8IckzK+ltifIIE9EMIMTuT/mEzoIMewUINruDBIR/jJnbguonqQ==" crossorigin="anonymous"></script>
+<script>
+    var Code = new Vue({
+        el: '#Code',
+        data: {
+            InviteCode: "",
+            CheckInvite: false,
+        },
+        computed: {
+        },
+        methods: {
+            CheckInviteCode: function () {
+                axios.post('/JSON/CheckInvite', {
+                    inviteCode: this.InviteCode,
+                }, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    }).then(response => {// Возвращать ThesisId
+                        this.CheckInvite = response.data
+                    }).catch(error => {
+                        alert('Error');
+                        //Разблокировка
+                    });
+            }
+
+        }
+    });
+</script>
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

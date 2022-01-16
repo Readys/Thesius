@@ -1,0 +1,166 @@
+﻿@using Microsoft.AspNet.Identity
+@{
+    ViewBag.Title = "Главная";
+}
+
+@{
+    var userIdStr = User.Identity.GetUserId();
+    //userIdStr = userIdStr.Replace("-", "");
+
+}
+
+<div v-if="!Loading" id="loader" style="display:none;">
+    <loader object="#ff9633" color1="#ffffff" color2="#17fd3d" size="5" speed="2" bg="#343a40" objectbg="#999793" opacity="20" name="circular"></loader>
+</div>
+<div id="p_prldr"><div class="contpre"><span class="svg_anm"></span><br>Подождите<br><small>идет загрузка</small></div></div>
+
+<div class="container">
+    <div class="row">
+        <div id="appT" class="col-md">
+            <br />
+            <a class="btn btn-success" href="/Home/Cabinet">Добавить тезис</a>
+            <br /><br />
+            <h4>Фильтры</h4>
+            <br /><br />
+            <div>
+                <div v-for="(item, index) in FilterList" class="row">
+
+                </div>
+            </div>
+            <h4>Книга консенсуса</h4>
+            <div class="accordion" id="accordionExample">
+                <div v-for="(item, index) in СonsensusThesisList" class="accordion-item">
+                    <h2 class="accordion-header" :id="'heading' + item.ConsensusId">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" :data-bs-target="'#book' + item.ConsensusId" aria-expanded="true"
+                                :aria-controls="'book'  + item.ConsensusId" :style="{ color: '#' + СonsensusColor[index].hex}" style="font-weight:bold;">
+                            {{item.ConsensusName}} {{item.ConsensusValueMin}}-{{item.ConsensusValueMax}}%
+                        </button>
+                    </h2>
+                    <div :id="'book' + item.ConsensusId" class="accordion-collapse collapse show" :aria-labelledby="'heading' + item.ConsensusId" data-bs-parent="#accordionExample">
+                        <div class="accordion-body gy-1">
+                            <div v-for="thesis in item.ViewThesis" class="row gy-1 border bg-light" style="margin-bottom:15px;">
+                                <div class="col-lg-1 p-1 text-center" style="">
+                                    <span>
+                                        {{thesis.Thesis.ThesisId}}
+                                    </span>
+                                </div>
+                                <div class="col-lg-5 p-1">
+                                    {{thesis.Thesis.Description}}
+                                    <span class="badge rounded-pill bg-success">{{thesis.CountPlus}} </span>
+                                    <span class="badge rounded-pill bg-secondary">{{thesis.CountDnotNow}} </span>
+                                    <span class="badge rounded-pill bg-danger">{{thesis.CountMinus}} </span>
+                                    <span title="Процент за" class="badge bg-success">{{thesis.Procent}}</span>
+                                    <a :href="'/home/InfoThesis/' + thesis.Thesis.ThesisId" class="badge rounded-pill bg-info"><i style="color:white;" class="fas fa-eye"></i></a>
+                                </div>
+                                <div class="col-lg-3 p-1">
+                                    Категория: <button class="btn btn-sm badge bg-secondary">{{thesis.CategoryName}}</button>&nbsp;
+                                    Теги:
+                                    <span v-for="tag in thesis.Tags"><button class="btn btn-sm badge bg-secondary">{{tag.text}}</button>&nbsp;</span>
+                                </div>
+                                <div class="col-lg-3 p-1"><span v-if="thesis.Links.length == 1">Ссылка:</span><span v-if="thesis.Links.length > 1">Ссылки:</span><small v-for="link in thesis.Links">&nbsp;<a :href="link.Body" target="_blank">{{link.Name}}</a></small></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<style>
+    #p_prldr {
+        position: fixed;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        background: #9A12B3;
+        z-index: 30;
+    }
+
+    .contpre small {
+        font-size: 25px;
+    }
+
+    .contpre {
+        width: 250px;
+        height: 100px;
+        position: absolute;
+        left: 50%;
+        top: 48%;
+        margin-left: -125px;
+        margin-top: -75px;
+        color: #fff;
+        font-size: 40px;
+        letter-spacing: -2px;
+        text-align: center;
+        line-height: 35px;
+    }
+
+    #p_prldr .svg_anm {
+        position: absolute;
+        width: 41px;
+        height: 41px;
+        background: url(/Content/img/pufff.svg) center center no-repeat;
+        background-size: 41px;
+        margin: -16px 0 0 -16px;
+    }
+    /*.list-enter,
+    .list-leave-to {
+        visibility: hidden;
+        height: 0;
+        margin: 0;
+        padding: 0;
+        opacity: 0;
+    }
+
+    .list-enter-active,
+    .list-leave-active {
+        transition: all 0.7s;
+    }*/
+</style>
+
+<script src="~/Scripts/jquery-3.3.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous"></script>
+<script src="~/Scripts/moduls/vue-tags-input.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js" integrity="sha512-bZS47S7sPOxkjU/4Bt0zrhEtWx0y0CRkhEp8IckzK+ltifIIE9EMIMTuT/mEzoIMewUINruDBIR/jJnbguonqQ==" crossorigin="anonymous"></script>
+@*<script src="https://cdnjs.cloudflare.com/ajax/libs/vue-select/3.10.8/vue-select.js"></script>*@
+<script src="~/Scripts/moduls/loader.js"></script>
+
+<script type="text/javascript">
+    $(window).on('load', function () {
+        var $preloader = $('#p_prldr'),
+            $svg_anm = $preloader.find('.svg_anm');
+        $svg_anm.fadeOut();
+        $preloader.delay(500).fadeOut('slow');
+    });
+</script>
+
+<script>
+    var appT = new Vue({
+        el: '#appT',
+        data: {
+            СonsensusThesisList:[               ],
+            СonsensusColor: [{ hex: '270' }, { hex: '570' }, { hex: 'a70' }, { hex: 'd70' }, { hex: 'f70' }],
+            FilterList:[],
+        },
+        computed: {
+        },
+        methods: {
+
+        },
+        mounted: function () {
+            $("#appT").show();
+            setTimeout(() => { $("#loader").hide(); }, 2000);
+
+            axios
+                .get('/JSON/GetConsensus/')
+                .then(response => (this.СonsensusThesisList = response.data.viewConsensusList));
+
+
+        },
+    });
+
+</script>

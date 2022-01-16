@@ -1,0 +1,750 @@
+﻿@model  Thesius_001.Models.Article
+@{
+    ViewBag.Title = "Добавить публикацию";
+
+    var blocks = ViewBag.Blocks;
+    var viewArticleBlock = ViewBag.ViewArticleBlock;
+
+}
+
+<br />
+<h2>@ViewBag.Title</h2>
+<h3></h3>
+<br />
+
+
+
+<div id="addArticle" class="container">
+    <div class="row" style="margin-bottom:20px;">
+        <div class="col-md-1"></div>
+        <div class="col-md-7">
+            <div class="input-group input-group-lg">
+                <input @@change="SaveTitle()" v-model="article.Title" type="text" class="form-control" placeholder="Введите заголовок" aria-label="Заголовок" aria-describedby="inputGroup-sizing-lg">
+                <button @@click="ClearTitle()" class="btn btn-outline-secondary" type="button" id="button-addon2"><i class="fas fa-times"></i></button>
+            </div>
+        </div>
+        <div class="col-md-4">
+
+        </div>
+    </div>
+    <draggable id="test" class="dragArea list-group"
+               :list="blocks"
+               :group="{ name: 'people', pull: 'clone', put: false }"
+               @@change="log">
+        <div style="margin-top:0px;" class="row"
+             v-for="(item, index) in blocks"
+             :key="item.ArticleBlockId">
+            <div class="col-md-1">
+
+            </div>
+            <div v-if="item.Type == 0" class="col-md-7" style="position: relative; background-color:white;">
+                <div class="row">
+                    <div class="col-md-5"></div>
+                    <div class="col-md-3">
+                        <button @@click="ChangeTypeBlock(item.ArticleBlockId, 1, index)" class="btn btn-success">Текст</button>
+                        <button @@click="ChangeTypeBlock(item.ArticleBlockId, 2, index)" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#exampleModal">Тезис</button>
+                    </div>
+                    <div class="col-md-4"></div>
+                </div>
+            </div>
+            <div v-if="item.Type == 1" class="col-md-7" style="position: relative; background-color:white; padding-top:15px">
+                <i style="color: gray; display: block; position: absolute; top: 5px; left: -22px; cursor: pointer;" class="fas fa-bars"></i>
+                <i @@click="AddMiddleBlock(0, index)" style="color: green; display: block; position: absolute; top: -15px; left: -22px; cursor: pointer;" class="fas fa-plus"></i>
+                <medium-editor :id="index" :text='item.Text_' :options='options' v-on:edit='processEditOperation' custom-tag='span'>
+                </medium-editor>
+            </div>
+            <div v-if="item.Type == 2" class="col-md-7" style="position: relative; background-color:aliceblue; padding-top:15px">
+                <i style="color: gray; display: block; position: absolute; top: 5px; left: -22px; cursor: pointer;" class="fas fa-bars"></i>
+                <i @@click="AddMiddleBlock(0, index)" style="color: green; display: block; position: absolute; top: -15px; left: -22px; cursor: pointer;" class="fas fa-plus"></i>
+                @*<medium-editor v-if="item.ViewThesis.Thesis" :id="index" :text='item.ViewThesis.Thesis.Description' :options='options' v-on:edit='processEditOperation' custom-tag='p'>
+                </medium-editor>*@
+                <span @@click="EditThesis(index, 2)" style="cursor:pointer;" >{{item.ViewThesis.Thesis.Description}}</span>
+                @*<template v-if="item.ViewThesis != undefined">
+                        <span title="Голосов За" class="badge rounded-pill bg-success">{{item.ViewThesis.CountPlus}} </span>
+                        <span title="Воздержались" class="badge rounded-pill bg-secondary">{{item.ViewThesis.CountDnotNow}} </span>
+                        <span title="Голосов против" class="badge rounded-pill bg-danger">{{item.ViewThesis.CountMinus}} </span>
+                        <span title="Процент За" class="badge bg-success">{{item.ViewThesis.Procent + "%"}}</span>
+                    </template>*@
+            </div>
+            <div style="position: relative;" class="col-md-4">
+                <i @@click="DelBlock(item.ArticleBlockId, index)" style="color: gray; display: block; position: absolute; top: 5px; left: 10px; cursor: pointer;" class="fas fa-times"></i>
+            </div>
+        </div>
+    </draggable>
+    <div class="row" style="margin-top:15px;">
+        <div class="col-md-1">
+        </div>
+        <div class="col-md-7" style="background-color: white; padding-bottom: 15px;padding-top: 15px;padding-left: 0px;padding-right: 0px;">
+            <div class="row">
+                <div class="col-md-5"></div>
+                <div class="col-md-3">
+                    <button @@click="AddBlockText(1)" class="btn btn-success">Текст</button>
+                    <button id="addThesis" @@click="ShowAddThesis(blocks.length, 2)" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#exampleModal">Тезис</button>
+                </div>
+                <div class="col-md-4"></div>
+            </div>
+        </div>
+        <div class="col-md-4">
+        </div>
+    </div>
+    <div class="row" style="margin-top:15px;">
+        <div class="col-md-1">
+        </div>
+        <div class="col-md-7" style="background-color: white; padding-bottom: 15px;padding-top: 15px;padding-left: 0px;padding-right: 0px;">
+            <div class="row">
+                <div class="col-md-2"></div>
+                <div class="col-md-9">
+                    <vue-tags-input v-model="article_tag"
+                                    :add-on-blur="false"
+                                    :tags="article_tags"
+                                    :autocomplete-items="autocompleteItems2"
+                                    @@tags-changed="newTags => tags = newTags"
+                                    @@before-adding-tag="checkTag" />
+                </div>
+                <div class="col-md-1"></div>
+            </div>
+        </div>
+        <div class="col-md-4">
+        </div>
+    </div>
+    <div class="row" style="margin-top:15px;">
+        <div class="col-md-1">
+        </div>
+        <div class="col-md-7" style="background-color: #F9F9FB; padding-bottom: 15px;padding-top: 15px;padding-left: 0px;padding-right: 0px;">
+            <div class="row">
+                <div class="col-md-2"></div>
+                <div class="col-md-9">
+                    <button @@click="SaveArticle(1)" class="btn btn-success">Опубликовать</button>
+                    <button class="btn btn-success">Сохранить черновик</button>
+                    <span class="small"><i>Сохранено в {{timeSave}}</i></span>
+                </div>
+                <div class="col-md-1"></div>
+            </div>
+        </div>
+        <div class="col-md-4">
+        </div>
+    </div>
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalLabel">{{ThesisInputText}}</h6>
+                    <button @@click="EditThesisClose()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label"><span style="color:red;">*</span>Содержание тезиса</label>
+                        <textarea v-model="ThesisInputText" @@chage="EditTextThesis()" v-on:keyup.space="Space" v-on:keyup="countdown" class="form-control" id="exampleFormControlTextarea1" rows="4"></textarea>
+                        <p class="text-end" v-bind:class="{'text-danger': ThesisTextOverLoad }"><small>Осталось символов: {{remainingCount}}</small></p>
+                        <label v-if="simularThesis.length > 0"><small>Похожие тезисы в базе:</small></label>
+                        <button class="btn btn-sm btn-light" v-for="t in simularThesis" @@click="SelectThesis(t.ThesisId, indexBlock)" title="Выбрать тезис"
+                                data-bs-dismiss="modal" aria-label="Close">
+                            <small>{{t.Description}}</small>
+                        </button>
+                    </div>
+                    <div class="mb-3">
+                        <label for="exampleFormControlTextarea1" class="form-label"><span style="color:red;">*</span>Добавление тэгов (Первый тэг считается категорией):</label>
+                        <vue-tags-input v-model="tag"
+                                        :add-on-blur="false"
+                                        :tags="tags"
+                                        :autocomplete-items="autocompleteItems"
+                                        @@tags-changed="newTags => tags = newTags"
+                                        @@before-adding-tag="checkTag" />
+                    </div>
+                    <div>
+                        <label for="exampleFormControlTextarea1" class="form-label">Ссылки:</label>
+                    </div>
+                    <template v-for="(link, indexLink) in Links">
+                        <div class="mb-3">
+                            <input class="form-control form-control-sm" type="text" v-model="link.Name" placeholder="Название ссылки">
+                        </div>
+                        <div class="mb-3">
+                            <input class="form-control form-control-sm" type="text" v-model="link.Body" placeholder="http://">
+                        </div>
+                        <div class="mb-3">
+                            <button @@click="LinkDelete(link, indexLink)" class="btn btn-sm btn-danger" type="button"><i class="fas fa-plus"></i>&nbsp; Удалить ссылку</button>
+                        </div>
+                    </template>
+                    <div class="mb-3">
+                        <button @@click="AddLink()" class="btn btn-sm btn-success" type="button"><i class="fas fa-plus"></i>&nbsp; Добавить ссылку</button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button @@click="EditThesisClose()" type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button v-if="!ThesisSaveLoad && !ThesisTextOverLoad && tags.length > 1" type="button" @@click="CreateThesis(0)" class="btn btn-sm btn-primary">
+                      Сохранить тезис
+                    </button>
+                    <button v-if="ThesisSaveLoad  && !ThesisTextOverLoad" class="btn btn-sm btn-primary" type="button" disabled>
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        Загрузка...
+                    </button>
+                    <span v-if="!ThesisSaveLoad  && ThesisTextOverLoad && !loadTag" id="example" class="d-inline-block" tabindex="0"
+                          data-bs-toggle="tooltip" data-bs-placement="right" title="Превышен лимит объема текста в тезисе!">
+                        <span><button @@click="CreateThesis(0)" class="btn btn-sm btn-danger" type="button">Сохранить тезис</button></span>
+                    </span>
+                    <span v-if="tags.length < 2">
+                        <button disabled="disabled" class="btn btn-sm btn-danger" type="button"> Сохранить тезис</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- EndModal -->
+</div>
+
+
+<style>
+    body {
+        background-color: #f4f4f4;
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js" integrity="sha512-bZS47S7sPOxkjU/4Bt0zrhEtWx0y0CRkhEp8IckzK+ltifIIE9EMIMTuT/mEzoIMewUINruDBIR/jJnbguonqQ==" crossorigin="anonymous"></script>
+<script src="//cdn.jsdelivr.net/npm/sortablejs@1.8.4/Sortable.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/Vue.Draggable/2.20.0/vuedraggable.umd.min.js"></script>
+<script src="//cdn.rawgit.com/FranzSkuffka/vue-medium-editor/0.1.0/dist/vueMediumEditor.min.js"></script>
+<script src="~/Scripts/moduls/vue-tags-input.js"></script>
+
+
+<script>
+
+    Vue.component('vue-tags-input');
+
+	new Vue({
+		el: "#addArticle",
+        data: {
+            //Test: [{ id: 1, NameRu: "1" }, { id: 2, NameRu: "2" }, { id: 3, NameRu: "3" }],
+            article:  @Html.Raw(Json.Encode(Model)),
+            blocks: @Html.Raw(Json.Encode(viewArticleBlock)),
+		    activeInvite:  @Html.Raw(Json.Encode(ViewBag.ActiveInvite)),
+            viewInviteUser:  @Html.Raw(Json.Encode(ViewBag.ViewInviteUser)),
+            //openBlock: {},
+            options: {},
+            text: "",
+            blockid: 0,
+            type: 0,
+            tag: '',
+            tags: [],
+            autocompleteItems: [],
+            article_tag: '',
+            article_tags: [],
+            autocompleteItems2: [],
+
+            Links: [],
+            simularThesis: [],
+            ThesisInputText: "",
+            maxCount: 512,
+            remainingCount: 512,
+            ThesisTextOverLoad: false,
+            ThesisSaveLoad: false,
+            loadTag: false,
+            SelectSimularThesis: {},
+            indexBlock: 0,
+            countedit: 0,
+            debounce: null,
+            timeSave: "",
+
+            block2Send: 0,
+            editThesis: 0,
+            thesisId: 0,
+        },
+        components: {
+            'medium-editor': vueMediumEditor.default
+        },
+        watch: {
+            'tag3': 'initItems3', 'tag': 'initItems', 'article_tag': 'initItems2', 
+        },
+        methods: {
+            EditTextThesis() {
+                alert("ku");
+            },
+            ConvertTime() {
+                var dt = new Date(parseInt(this.article.ModifedDate.substr(6, 13)));
+                var h = dt.getHours();
+                var m = dt.getMinutes();
+                if (h < 10) { h = "0" + h; }
+                if (m < 10) { m = "0" + m; }
+
+                this.timeSave = h + ":" + m;
+            },
+            SaveArticle(auto) {
+                axios.post('/JSON/SaveArticle/', {
+                    id: this.article.ArticleId, tags: this.article_tags, auto: auto,
+                }, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    }).then(response => {
+                        if (response.data == "Ok") {
+                            var dt = new Date();
+                            this.timeSave = dt.getHours() + ":" + dt.getMinutes();
+                        }
+
+                    }).catch(error => {
+                        this.ThesisSaveLoad = !this.ThesisSaveLoad;
+                        alert('Error');
+                    });
+            },
+            TypeChange(type) {
+                this.type = type;
+                alert(this.type);
+            },
+            CreateThesis: function (id, type) {
+                //this.CategoryMyThesisBookList[this.categoryIndex].ViewThesis[this.thesisIndex].Tags = this.tags;
+                // Блокировка
+                if (this.tags.length < 2 && type == 0) {
+                    return alert("Должно быть как минимум два элемента в поле Тэгов!");
+                }
+
+                if (this.ThesisInputText.length < 20) {
+                    return alert("Должно быть больше 20 символов в тексте тезиса");
+                }
+
+                this.ThesisSaveLoad = !this.ThesisSaveLoad;
+
+                var catId = this.tags[0].tagId;
+                var catName = this.tags[0].text
+                //this.tags.splice(0, 1);
+
+                if (!this.ThesisTextOverLoad) {
+                    axios.post('/JSON/CreateThesis/', {
+                        links: this.Links, userId: this.userId, categoryId: catId, categoryName: catName,
+                        description: this.ThesisInputText, tags: this.tags, articleBlockId: this.blocks[this.indexBlock].ArticleBlockId, id: this.thesisId
+                    }, {
+                            headers: {
+                                'Content-Type': 'application/json',
+                            }
+                        }).then(response => {// Возвращать ThesisId
+                            if (response.data > 0) {
+                                this.ThesisSaveLoad = !this.ThesisSaveLoad;
+
+                                this.blocks.splice(this.indexBlock, 1, {
+                                    ArticleBlockId: this.blocks[this.indexBlock].ArticleBlockId, Text_: this.ThesisInputText, Type: 2, ViewThesis:
+                                    {
+                                        "Thesis": {
+                                            "ThesisId": response.data, "Userid": null, "Description": this.ThesisInputText, "Links": null,
+                                            "CreateDate": "", "ModifedDate": "", "CategoryId": 0, "FirstTagId": 0, "Deleted": 0
+                                        },
+                                        "CategoryId": 0, "CategoryName": "", "Tags": this.tags, "Links": this.Links, "My": true, "CountPlus": 0,
+                                        "CountMinus": 0, "CountDnotNow": 0, "Procent": 0
+                                    },
+                                });
+                            }
+                            if (response.data == -1) {
+                                this.ThesisSaveLoad = !this.ThesisSaveLoad;
+                                alert("У тезиса уже есть последователи, редактировать содержание нельзя, но можно добавлять теги и ссылки");
+                            }
+                            $('#exampleModal').modal('hide');
+                            this.ClearForm();
+                            //Разблокировка
+                        }).catch(error => {
+                            this.ThesisSaveLoad = !this.ThesisSaveLoad;
+                            alert('Error');
+                            //Разблокировка
+                        });
+                } else {
+                    alert("Превышен лимит объема текста в тезисе!");
+                }
+
+                this.SaveArticle(0);
+            },
+            ClearForm: function () {
+                this.tag = '';
+                this.tags = [];
+                this.Links = [];
+                this.ThesisInputText = "";
+                this.ThesisTextOverLoad = false;
+                this.ThesisSaveLoad = false;
+                this.ShowCreateThesis = false;
+                this.thesisId = 0;
+            },
+            SelectThesis(id) {
+                axios.post('/JSON/SelectThesis/', {
+                    id: id, idBlock: this.blocks[this.indexBlock].ArticleBlockId
+                }, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    }).then(response => {
+                        this.SelectSimularThesis = response.data.viewThesis;
+                        this.ThesisInputText = this.SelectSimularThesis.Thesis.Description;
+                        this.tags = this.SelectSimularThesis.Tags;
+                        this.Links = this.SelectSimularThesis.Links;
+
+                        this.blocks.splice(this.indexBlock, 1, {
+                            ArticleBlockId: this.blocks[this.indexBlock].ArticleBlockId, Text_: this.ThesisInputText, Type: 2, ViewThesis: this.SelectSimularThesis, 
+                        });
+                        //this.blocks.push();
+                    }).catch(error => {
+                        alert('Error');
+                    });
+            },
+            ShowAddThesis(index, orderType) {
+                if (this.editThesis != 1) {
+                    if (orderType == 2) { this.indexBlock = this.blocks.length; }
+                    if (this.block2Send == 0) {
+                        this.block2Send = 1;
+                        axios.post('/JSON/AddBlockTextThesis/', {
+                            id: this.article.ArticleId, type: 2, order: this.indexBlock + 1
+                        }, {
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                }
+                            }).then(response => {
+                                this.blocks.splice(index, 1, response.data.viewArticleBlock);
+                                this.block2Send = 0;
+                                this.SaveArticle(0);
+                            }).catch(error => {
+                                alert('Error');
+                            });
+                    }
+                    $("#addThesis").click();
+                    this.recalcOrder();
+                } else {
+
+                }
+
+            },
+            EditThesis(index, orderType) {
+                this.indexBlock = index;
+                this.editThesis = 1
+                this.thesisId = this.blocks[index].ViewThesis.Thesis.ThesisId;
+                this.ThesisInputText = this.blocks[index].ViewThesis.Thesis.Description;
+                this.tags = this.blocks[index - 1].ViewThesis.Tags;
+                $("#addThesis").click();
+
+
+                //this.recalcOrder();
+            },
+            processEditOperation: function (operation) {
+                var id = 0;
+                this.countedit++;
+                //this.text = operation.api.origElements.innerHTML;
+                this.text = operation.event.currentTarget.innerHTML;
+                this.blockid = operation.event.currentTarget.id;
+                if (this.countedit == 1) {
+                    if (operation.event.currentTarget.localName == "p") {
+                        this.ThesisInputText = this.text;
+                        this.tags = this.blocks[this.blockid].ViewThesis.Tags;
+                        this.CreateThesis(this.blocks[this.blockid].ViewThesis.Thesis.ThesisId,1);
+                    }
+                    if (operation.event.currentTarget.localName == "span") {
+                        this.EditBlockText(1);
+                    }
+                }
+
+
+                if (this.countedit == this.blocks.length) { this.countedit = 0}
+                //this.type = operation.event.currentTarget.type;
+                //alert(this.type);
+
+                //
+            },
+            DelBlock(id, index) {
+                if (confirm("Удалить?")) {
+                    axios.post('/JSON/DelBlock/', {
+                        id: id,
+                    }, {
+                            headers: {
+                                'Content-Type': 'application/json',
+                            }
+                        }).then(response => {
+                            if (response.data = "Ok") {
+                                this.blocks.splice(index, 1);
+                                this.recalcOrder();
+                            }
+
+                        }).catch(error => {
+                            this.ThesisSaveLoad = !this.ThesisSaveLoad;
+                            alert('Error');
+                        });
+                } else {
+                   
+                }
+
+
+            },
+            EditBlockText(type) {
+                axios.post('/JSON/EditBlockText/', {
+                    id: this.blocks[this.blockid].ArticleBlockId, type: type, text: this.text
+                }, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    }).then(response => {
+                        if (response.data > 0) {
+                            this.SaveArticle(0);
+                        }
+
+                    }).catch(error => {
+                        this.ThesisSaveLoad = !this.ThesisSaveLoad;
+                        alert('Error');
+                    });
+            },
+            AddBlockText(type) {
+                axios.post('/JSON/AddBlockText/', {
+                    id: this.article.ArticleId, type: type, order: this.blocks.length + 1
+                }, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    }).then(response => {
+                        if (response.data > 0) {
+                            this.blocks.push({
+                                ArticleBlockId: response.data, Text_: "Введите текст", Type:1
+                            });
+                            this.SaveArticle(0);
+                            this.recalcOrder();
+                        }
+
+                    }).catch(error => {
+                        this.ThesisSaveLoad = !this.ThesisSaveLoad;
+                        alert('Error');
+                    });
+
+
+            },
+            AddMiddleBlock(type, index) {
+                this.indexBlock = index;
+                axios.post('/JSON/AddBlockText/', {
+                    id: this.article.ArticleId, type: type, order: index,
+                }, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    }).then(response => {
+                        if (response.data > 0) {
+                            this.blocks.splice(index, 0, {
+                                ArticleBlockId: response.data, Text_: "Введите текст", Type: type
+                            });
+                            this.SaveArticle(0);
+                            this.recalcOrder();
+                        }
+                    }).catch(error => {
+                        alert('Error');
+                    });
+            },
+            ChangeTypeBlock(id, type, index) {
+                axios.post('/JSON/ChangeTypeBlock/', {
+                    id: id, type: type
+                }, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    }).then(response => {
+                        if (response.data == "Ok") {
+                            this.blocks[index].Type = type;
+                            this.SaveArticle(0);
+                        }
+                    }).catch(error => {
+
+                        alert('Error');
+                    });
+            },
+            AddTypeBlock() {
+
+            },
+            AddFirstBlock() {
+
+            },
+		    ClearTitle() {
+                this.article.Title = "";
+                this.SaveArticle(0);
+		    },
+		    SaveTitle() {
+		        axios.post('/JSON/AddTitleArticle/', {
+		        id: this.article.ArticleId, articleTitle: this.article.Title
+		        }, {
+		        headers: {
+		        'Content-Type': 'application/json',
+		        }
+		        }).then(response => {
+                    this.SaveArticle(0);
+		        }).catch(error => {
+		        alert('Error');
+		        });
+            },
+            log: function (evt) {
+                window.console.log(evt);
+                //this.blocks[evt.moved.newIndex].Order = evt.moved.newIndex;
+                this.recalcOrder();
+
+                //axios.post('/JSON/ChangeOrder/', {
+                //    viewArticleBlock: this.blocks,
+                //}, {
+                //        headers: {
+                //            'Content-Type': 'application/json',
+                //        }
+                //    }).then(response => {
+                //        if (response.data = "Ok") {
+                //        }
+
+                //    }).catch(error => {
+                //        this.ThesisSaveLoad = !this.ThesisSaveLoad;
+                //        alert('Error');
+                //    });
+                //this.changeData();
+            },
+            recalcOrder() {
+                for (var i = 0; i < this.blocks.length; i++) {
+                    this.blocks[i].Order = i;
+                }
+                axios.post('/JSON/ChangeOrder/', {
+                    viewArticleBlock: this.blocks,
+                }, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    }).then(response => {
+                        if (response.data = "Ok") {
+                        }
+                    }).catch(error => {
+                        alert('Error');
+                    });
+            },
+            onAdd: function (e) {
+                window.console.log(e);
+                //this.changeData();
+            },
+            onMove: function () {
+                //alert("ku");
+            },
+            countdown: function () {
+                var tLength = this.ThesisInputText.length;
+
+                this.remainingCount = this.maxCount - tLength;
+                this.ThesisTextOverLoad = this.remainingCount < 0;
+                
+                this.blocks[this.indexBlock].ViewThesis.Thesis.Description = this.ThesisInputText;
+            },
+            initItems() {
+                if (this.tag.length < 2) return;
+                this.loadTag = true;
+                var typeTag = 1;
+                if (this.tags.length == 0) { typeTag = 0; }
+                clearTimeout(this.debounce);
+                this.debounce = setTimeout(() => {
+                    $("#loader").show();
+                    axios.post('/JSON/GetSimularTag/', { search: this.tag, typeTag: typeTag }).then(response => {//
+                        this.autocompleteItems = response.data.tags.map(a => {
+                            return { text: a.Name, tagId: a.TagId };//tagId: a.TagId,
+                        });
+                        $("#loader").hide();
+                        this.loadTag = false;
+                    }).catch(() => console.warn('Ой! Что-то пошло не так!'));
+                }, 600);
+                $("#loader").hide();
+
+            },
+            initItems2() {
+                if (this.article_tag.length < 2) return;
+                this.loadTag = true;
+                var typeTag = 1;
+                if (this.article_tags.length == 0) { typeTag = 0; }
+                clearTimeout(this.debounce);
+                this.debounce = setTimeout(() => {
+                    $("#loader").show();
+                    axios.post('/JSON/GetSimularTag/', { search: this.article_tag, typeTag: typeTag }).then(response => {//
+                        this.autocompleteItems2 = response.data.tags.map(a => {
+                            return { text: a.Name, tagId: a.TagId };//tagId: a.TagId,
+                        });
+                        $("#loader").hide();
+                        this.loadTag = false;
+                    }).catch(() => console.warn('Ой! Что-то пошло не так!'));
+                }, 600);
+                $("#loader").hide();
+
+            },
+            checkTag(obj) {
+                var typeTag = 1;
+                if (this.tags.length == 0) { typeTag = 0; }
+                $("#loader").show();
+                axios.post('/JSON/CreateTag/', { userId: this.userId, name: obj.tag.text, typeTag: typeTag, }, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                }).then(response => {
+                    if (response.data > 0) {
+                        //alert("Тэг добавлен с id " + response.data);
+                        this.tags.push(
+                            { text: this.tag, tagId: response.data }
+                        );
+                        this.tag = "";
+                        $("#loader").hide();
+                    } else if (response.data == -1) {
+                        obj.addTag();
+                        this.tag = "";
+                        $("#loader").hide();
+                    }
+                    this.SaveArticle(0);
+                }).catch(error => {
+                    alert('Error');
+                    $("#loader").hide();
+                });
+                //if (this.tags.length < 2 && !contains(this.CategoryMyThesisBookList, this.tag)) {
+                //    //alert("Нет");
+                //    this.CategoryMyThesisBookList.unshift({
+                //        CategoryId: 0, CategoryName: this.tag, OpenClose: false,
+                //    });
+                //}
+            },
+            Space: function () {
+                this.equalText(this.ThesisInputText);
+            },
+            equalText: function (text) {
+                axios.post('/JSON/SimularThesis/', {
+                    text: text,
+                }, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    }).then(response => {
+                        this.simularThesis = response.data.thesisList;
+                        //Разблокировка
+                        $("#loader").hide();
+                    }).catch(error => {
+                        $("#loader").hide();
+                        alert('Error');
+                        //Разблокировка
+                    });
+            },
+        },
+        updated() {
+            //this.ConvertTime();
+            //alert("ku");
+            //this.article_tags = this.blocks[0].ViewThesis.Tags;
+        },
+		mounted: function () {
+				//		axios
+				//.get('/JSON/GetConsensus/')
+    //            .then(response => (this.СonsensusThesisList = response.data.viewConsensusList));
+            this.ConvertTime();
+            for (var i = 0; i < this.blocks.length; i++) {
+                if (this.blocks[i].Type == 2) {
+                    var tags = this.blocks[i].ViewThesis.Tags;
+                    if (tags) {
+                        for (var ii = 0; ii < this.blocks[i].ViewThesis.Tags.length; ii++) {
+
+                            var checkDuble = this.article_tags.filter(obj => {
+                                return obj.TagId == this.blocks[i].ViewThesis.Tags[ii].TagId
+                            })
+
+                            if (checkDuble.length == 0) {
+                                this.article_tags.push(this.blocks[i].ViewThesis.Tags[ii]);
+                            }
+
+                        }
+                    }
+                }
+            }
+
+
+		},
+		});
+
+</script>

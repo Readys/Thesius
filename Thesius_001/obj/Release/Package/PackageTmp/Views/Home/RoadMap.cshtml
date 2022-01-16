@@ -1,0 +1,82 @@
+﻿@{
+    ViewBag.Title = "Дорожная карта";
+}
+<br />
+<h2>@ViewBag.Title</h2>
+<h3>@ViewBag.Message</h3>
+<br />
+<div class="accordion" id="accordionExample">
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="One">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#One" aria-expanded="true" aria-controls="One">
+                <b style="color:green">Текущая версия 0.0.7</b>
+            </button>
+        </h2>
+        <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+            <div class="accordion-body">
+                <ul>
+                    <li>Регистрация с подверждением емайла и с возможностью востановления забытого пароля</li>
+                    <li>Система приглашений по инвайткодам</li>
+                    <li>Создание тезисов, категорий и тегов</li>
+                    <li>Нахождение и вывод схожих тезисов при создании нового тезиса (Для уменьшения дубликатов тезисов)</li>
+                    <li>Выдача на голосование случайных тезисов</li>
+                    <li>Вычисление и вывод общего консенсуса</li>
+                    <li>Вычисление и вывод личного консенсуса</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="Two">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#Two" aria-expanded="true" aria-controls="Two">
+                Версия 0.1.0
+            </button>
+        </h2>
+        <div id="collapseTwo" class="accordion-collapse collapse show" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+            <div class="accordion-body">
+                <ul>
+                    <li>Вывод тезиса на отдельную страницу</li>
+                    <li>Генерация прямых ссылок для голосования по тезису</li>
+                    <li>Объеденение схожих тезисов, категория и тегов</li>
+                    <li>Фильтрация по категориям и тегам</li>
+                    <li>Сохранение шаблонов фильтраций</li>
+                    <li>Выгрузка личного консенсуса в виде книги в формате Word</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="Three">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#Three" aria-expanded="true" aria-controls="Three">
+                Версия 0.2.0
+            </button>
+        </h2>
+        <div id="collapseThree" class="accordion-collapse collapse show" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
+            <div class="accordion-body">
+                <ul>
+                    <li>Телеграмм бот для создания и оценки тезисов</li>
+                    <li>Система верификации по регионам</li>
+                    <li>Система верификации экспертов и фильтрация по экспертной оценке</li>
+                    <li>Сохранение данных в публичный блокчейн</li>
+                    <li>Рейтинговое голосование</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="Four">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#Four" aria-expanded="true" aria-controls="Four">
+                Версия 0.3.0
+            </button>
+        </h2>
+        <div id="collapseFour" class="accordion-collapse collapse show" aria-labelledby="headingFour" data-bs-parent="#accordionExample">
+            <div class="accordion-body">
+                <ul>
+                    <li>Создание дерева вложенных категорий</li>
+                    <li>Создание интерактивных книг, в которых можно будет голосовать за отдельные мысли</li>
+                    <li>Создание внутреннего суда присяжных для решения спорных вопросов таких как удаление материалов и блокировка мультиаккаунтов</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

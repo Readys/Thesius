@@ -1,0 +1,266 @@
+﻿@using Microsoft.AspNet.Identity
+@{
+    ViewBag.Title = "Публикации";
+}
+
+@{
+    var userIdStr = User.Identity.GetUserId();
+    //userIdStr = userIdStr.Replace("-", "");
+
+}
+
+
+<div v-if="!Loading" id="loader" style="display:none;">
+    <loader object="#ff9633" color1="#ffffff" color2="#17fd3d" size="5" speed="2" bg="#343a40" objectbg="#999793" opacity="20" name="circular"></loader>
+</div>
+<div id="p_prldr"><div class="contpre"><span class="svg_anm"></span><br>Подождите<br><small>идет загрузка</small></div></div>
+
+<div id="pub" class="container">
+    <div v-for="(pub, index) in Publications" class="row" style="margin-top:15px;">
+        <div class="col-md-1"></div>
+        <div class="col-md-7" style="background-color:white">
+            <div class="row">
+                <div class="col-md-1"><span class="small">{{pub.UserName}}</span></div>
+                <div class="col-md-3">
+                    <span class="small">
+                        <small>{{ConvertTime(pub.CreateDate)}}</small>
+                    </span>
+                </div>
+                <div class="col-md-7"></div>
+                <div class="col-md-1 ">
+                    <a v-if="pub.UserId == userId" :href="'/Home/AddEdit/' + pub.ArticleId"><i style="color:gray" class="fas fa-edit pull-right"></i></a>
+                    <i v-if="pub.UserId == 'c109f3f4-8549-42a2-b025-284a27480828'" @@click="TrashArticle(pub.ArticleId, index)" style="color:gray; cursor:pointer;" class="fas fa-trash"></i>
+                </div>
+            </div>
+            <div class="row" style="margin-top:5px;">
+                <div class="col-md-1"></div>
+                <div class="col-md-10"><h5 class="text-muted">{{pub.Title}}</h5></div>
+                <div class="col-md-1"></div>
+            </div>
+            <div class="row" style="margin-top:5px;">
+                <div class="col-md-1"></div>
+                <div class="col-md-10">
+                    <div v-if="pub.ShortView == 0">
+                        <p class="text-muted pp">{{pub.ViewArticleBlock[0].Text_}}</p>
+                        <a @@click="ShowAllArticle(pub.ArticleId, index)" href="#" style="text-decoration:none"><small>ПОКАЗАТЬ ПОЛНОСТЬЮ</small></a>
+                    </div>
+                    <div v-else>
+                        <p class="pp" v-for="(block, index) in pub.ViewArticleBlock">
+                            <span v-if="block.Type == 2" style="color:#877D7D; font-size:small" title="Ваша оценка">{{block.ViewThesis.MyMark}} </span>
+                            <span @@click="PlusThesis(index,block.ViewThesis.Thesis.ThesisId)" v-if="block.Type == 2 && block.ViewThesis.MyMark != 1" style="cursor:pointer; color:#877D7D" title="Оценить положительно"><b>+</b></span>
+                            <span v-if="block.Type == 2 && block.ViewThesis.MyMark == 1" style="cursor:pointer; color:#157347" title="Вы оценили тезис положительно"><b>+</b></span>
+                            <span @@click="MinusThesis(index,block.ViewThesis.Thesis.ThesisId)" v-if="block.Type == 2 && block.ViewThesis.MyMark != -1" style="cursor:pointer; color:#877D7D" title="Оценить отрицательно"><b>-</b></span>
+                            <span v-if="block.Type == 2 && block.ViewThesis.MyMark == -1" style="cursor:pointer; color:#DC3545" title="Вы оценили тезис отрицательно"><b>-</b></span>
+                            {{block.Text_}}
+                            <span v-if="block.Type == 2" style="cursor:pointer;" @@click="block.ViewThesis.ShowOther = !block.ViewThesis.ShowOther">→</span>
+                            <span v-if="block.Type == 2 && block.ViewThesis.ShowOther" class="badge rounded-pill bg-success">{{block.ViewThesis.CountPlus}} </span>
+                            <span v-if="block.Type == 2 && block.ViewThesis.ShowOther" class="badge rounded-pill bg-secondary">{{block.ViewThesis.CountDnotNow}} </span>
+                            <span v-if="block.Type == 2 && block.ViewThesis.ShowOther" class="badge rounded-pill bg-danger">{{block.ViewThesis.CountMinus}} </span>
+                            <span v-if="block.Type == 2 && block.ViewThesis.ShowOther" title="Процент за" class="badge bg-success">{{block.ViewThesis.Procent}}</span>
+                            <a v-if="block.Type == 2 && block.ViewThesis.ShowOther" :href="'/home/InfoThesis/' + block.ViewThesis.Thesis.ThesisId" class="badge rounded-pill bg-info"><i style="color:white;" class="fas fa-eye"></i></a>
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-1"></div>
+            </div>
+        </div>
+        <div class="col-md-4">
+
+        </div>
+    </div>
+    @*<div class="row" style="margin-top:15px;">
+            <div class="col-md-1">
+            </div>
+            <div class="col-md-7" style="background-color: white; padding-bottom: 15px;padding-top: 15px;padding-left: 0px;padding-right: 0px;">
+                <div class="row">
+                    <div class="col-md-5"></div>
+                    <div class="col-md-3">
+
+                    </div>
+                    <div class="col-md-4"></div>
+                </div>
+            </div>
+            <div class="col-md-4">
+            </div>
+        </div>
+        <div class="row" style="margin-top:15px;">
+            <div class="col-md-1">
+            </div>
+            <div class="col-md-7" style="background-color: white; padding-bottom: 15px;padding-top: 15px;padding-left: 0px;padding-right: 0px;">
+                <div class="row">
+                    <div class="col-md-2"></div>
+                    <div class="col-md-9">
+
+                    </div>
+                    <div class="col-md-1"></div>
+                </div>
+            </div>
+            <div class="col-md-4">
+            </div>
+        </div>
+        <div class="row" style="margin-top:15px;">
+            <div class="col-md-1">
+            </div>
+            <div class="col-md-7" style="background-color: #F9F9FB; padding-bottom: 15px;padding-top: 15px;padding-left: 0px;padding-right: 0px;">
+                <div class="row">
+                    <div class="col-md-2"></div>
+                    <div class="col-md-9">
+
+                    </div>
+                    <div class="col-md-1"></div>
+                </div>
+            </div>
+            <div class="col-md-4">
+            </div>
+        </div>*@
+
+</div>
+
+
+<style>
+    body {
+        background-color: #f4f4f4;
+    }
+</style>
+<script src="~/Scripts/jquery-3.3.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js" integrity="sha512-bZS47S7sPOxkjU/4Bt0zrhEtWx0y0CRkhEp8IckzK+ltifIIE9EMIMTuT/mEzoIMewUINruDBIR/jJnbguonqQ==" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+
+<script type="text/javascript">
+    $(window).on('load', function () {
+        var $preloader = $('#p_prldr'),
+            $svg_anm = $preloader.find('.svg_anm');
+        $svg_anm.fadeOut();
+        $preloader.delay(500).fadeOut('slow');
+    });
+
+
+
+</script>
+<script>
+    var pub = new Vue({
+        el: '#pub',
+        data: {
+            userId:  @Html.Raw(Json.Encode(userIdStr)),
+            Publications:[],
+        },
+        computed: {
+        },
+        methods: {
+            ThesisUpdateCount(index, id) {
+                axios.post('/JSON/ThesisUpdateCount/', {
+                    id: id,
+                }, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    }).then(response => {// Возвращать ThesisId
+                        this.Publications[0].ViewArticleBlock[index].ViewThesis.CountPlus = response.data.viewThesis.CountPlus;
+                        this.Publications[0].ViewArticleBlock[index].ViewThesis.Procent = response.data.viewThesis.Procent;
+                        //Разблокировка
+                        $("#loader").hide();
+                    }).catch(error => {
+                        $("#loader").hide();
+                        alert('Error');
+                        //Разблокировка
+                    });
+            },
+            MinusThesis: function (index, id) {
+                $("#loader").show();
+                axios.post('/JSON/MinusThesis2/', {
+                    thesisId: id,
+                }, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    }).then(response => {// Возвращать ThesisId
+                        this.Publications[0].ViewArticleBlock[index].ViewThesis.MyMark = response.data;
+                        this.ThesisUpdateCount(index,id);
+                        //Разблокировка
+                        $("#loader").hide();
+                    }).catch(error => {
+                        $("#loader").hide();
+                        alert('Error');
+                        //Разблокировка
+                    });
+            },
+            PlusThesis: function (index, id) {
+                $("#loader").show();
+                axios.post('/JSON/PlusThesis2/', {
+                    thesisId: id,
+                }, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    }).then(response => {// Возвращать ThesisId
+                        this.Publications[0].ViewArticleBlock[index].ViewThesis.MyMark = response.data;
+                        this.ThesisUpdateCount(index, id);
+
+                        //Разблокировка
+                        $("#loader").hide();
+                    }).catch(error => {
+                        $("#loader").hide();
+                        alert('Error');
+                        //Разблокировка
+                    });
+            },
+            ShowAllArticle(id, index) {
+                this.Publications[index].ShortView = 1
+                //axios.post('/JSON/ShowAllArticle/', {
+                //    id: id,
+                //}, {
+                //        headers: {
+                //            'Content-Type': 'application/json',
+                //        }
+                //    }).then(response => {
+                //        this.Publications[index].blocks = response.data.viewArticleBlock;
+                //        //Разблокировка
+                //        $("#loader").hide();
+                //    }).catch(error => {
+                //        $("#loader").hide();
+                //        alert('Error');
+                //        //Разблокировка
+                //    });
+            },
+            TrashArticle(id, index) {
+                if (confirm("Удалить публикацию?")) {
+                    axios.post('/JSON/DelArticle/', {
+                        id: id,
+                    }, {
+                            headers: {
+                                'Content-Type': 'application/json',
+                            }
+                        }).then(response => {
+                            if (response.data == "Ok") {
+                                this.Publications.splice(index, 1);
+                            }
+                            //Разблокировка
+                            $("#loader").hide();
+                        }).catch(error => {
+                            $("#loader").hide();
+                            alert('Error');
+                            //Разблокировка
+                        });
+                }
+
+            },
+
+            ConvertTime(data) {
+                var dt = new Date(parseInt(data.substr(6, data.length - 8), 10)).toLocaleString();
+                return dt;
+            },
+
+        },
+        mounted: function () {
+            $("#appT").show();
+            setTimeout(() => { $("#loader").hide(); }, 2000);
+
+            axios
+                .get('/JSON/Publications/')
+                .then(response => (this.Publications = response.data.viewArticles));
+
+
+        },
+    });
+
+</script>
