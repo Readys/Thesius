@@ -20,23 +20,6 @@ namespace Thesius_001.Tools
 
         public static void SendMail(string from, List<string> toList, string subject, string messageText)
         {
-            //// наш email с заголовком письма
-            //MailAddress from2 = new MailAddress("admin@thesius.ru", "Web Registration");
-            //// кому отправляем
-            ////MailAddress to = new MailAddress(user.Email);
-            //// создаем объект сообщения
-            //MailMessage m = new MailMessage("admin@thesius.ru", "armyideas@gmail.com"); //from, to
-            //// тема письма
-            //m.Subject = "Thesius: Подтверждение Email";
-            //// текст письма - включаем в него ссылку
-            //m.Body = "test";
-            //m.IsBodyHtml = true;
-            //// адрес smtp-сервера, с которого мы и будем отправлять письмо
-            //SmtpClient smtp = new SmtpClient("mail.hosting.reg.ru", 25);
-            //// логин и пароль
-            //smtp.Credentials = new System.Net.NetworkCredential("admin@thesius.ru", "6xjJZRymgmJLpF9");
-            //smtp.Send(m);
-
 
             var configMail = ConfigurationManager.GetSection("MailBox") as NameValueCollection;
 
