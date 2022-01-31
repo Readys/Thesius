@@ -1,0 +1,210 @@
+﻿
+@{
+    ViewBag.Title = "Загрузка из XML";
+}
+
+<h2>Демо загрузки из XML</h2>
+<p>Алгоритм каждый раз удаляет данные из базы и загружает новые из демо-файла XML (3000 записей)</p>
+<div id="grid-view-model">
+    <button @@click="LoadXML()" class="btn btn-success btn-sm">Загрузить XML</button>
+    <br />
+    <br />
+    <div v-if="gridData.length > 0">
+        <form id="search">
+            Search
+            <input class="form-control form-control-sm" name="query" v-model="searchQuery">
+        </form>
+        <div v-show="gridData.length > 0" class="input-group md-6">
+            <span class="input-group-text input-group-sm" id="addon-wrapping">Code</span>
+            <input type="number" class="form-control form-control-sm md-2" v-model="code" placeholder=" ">
+            <span class="input-group-text input-group-sm" id="addon-wrapping">INN</span>
+            <input type="number" class="form-control form-control-sm md-2" v-model="inn" placeholder=" ">
+            <span class="input-group-text input-group-sm" id="addon-wrapping">KPP</span>
+            <input type="number" class="form-control form-control-sm md-2" v-model="kpp" placeholder=" ">
+        </div>
+        <br />
+        <div>
+            <grid :data="filteredList | orderByBusinessRules | filterBy searchQuery | limitBy rowsPerPage startRow" :columns="gridColumns">
+            </grid>
+        </div>
+        <div id="page-navigation">
+            <button @@click=movePages(-1)>Back</button>
+            <p>{{startRow / rowsPerPage + 1}} out of {{gridData.length / rowsPerPage}}</p>
+            <button @@click=movePages(1)>Next</button>
+        </div>
+    </div>
+    <div id="loader" class="loader"  style="display:none;"></div>
+</div>
+
+<style>
+    .loader {
+        border: 16px solid #f3f3f3; /* Light grey */
+        border-top: 16px solid #3498db; /* Blue */
+        border-radius: 50%;
+        width: 120px;
+        height: 120px;
+        animation: spin 2s linear infinite;
+        width: 100px;
+        position: relative;
+        margin: 0 auto
+    }
+
+
+    @@keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    body {
+        font-family: Helvetica Neue, Arial, sans-serif;
+        font-size: 14px;
+        color: #444;
+    }
+
+    table {
+        border: 2px solid #42b983;
+        border-radius: 3px;
+        background-color: #fff;
+    }
+
+    th {
+        background-color: #42b983;
+        color: rgba(255, 255, 255, 0.66);
+        cursor: pointer;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -user-select: none;
+    }
+
+    td {
+        background-color: #f9f9f9;
+    }
+
+    th,
+    td {
+        min-width: 120px;
+        padding: 10px 20px;
+    }
+
+    #search {
+        margin-bottom: 10px;
+    }
+
+    #page-navigation {
+        display: flex;
+        margin-top: 5px;
+    }
+
+        #page-navigation p {
+            margin-left: 5px;
+            margin-right: 5px;
+        }
+
+        #page-navigation button {
+            background-color: #42b983;
+            border-color: #42b983;
+            color: rgba(255, 255, 255, 0.66);
+        }
+</style>
+
+<script type="text/x-template" id="grid-template">
+    <table>
+        <thead>
+            <tr>
+                <th v-for="key in columns">
+                    {{key | capitalize}}
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr v-for="entry in data">
+                <td v-for="key in columns">
+                    {{entry[key]}}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</script>
+<script src="https://cdn.jsdelivr.net/vue/1.0.28/vue.js"></script>
+@*<script src="https://cdnjs.cloudflare.com/ajax/libs/vue-resource/1.3.4/vue-resource.common.js"></script>*@
+<script type="text/javascript" src="http://cdn.jsdelivr.net/vue.table/1.5.3/vue-table.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js" integrity="sha512-bZS47S7sPOxkjU/4Bt0zrhEtWx0y0CRkhEp8IckzK+ltifIIE9EMIMTuT/mEzoIMewUINruDBIR/jJnbguonqQ==" crossorigin="anonymous"></script>
+
+<script>
+
+    // register the grid component
+    Vue.component('grid', {
+        template: '#grid-template',
+        props: {
+            data: Array,
+            columns: Array
+        }
+    });
+
+    // Create the view-model
+    var gridViewModel = new Vue({
+        el: '#grid-view-model',
+        data: {
+            searchQuery: '',
+            gridColumns: ['Code', 'Name', 'IsElectronic', 'Competitive', 'FullName', 'Inn', 'Kpp' ],
+            gridData: [],
+            startRow: 0,
+            rowsPerPage: 50,
+            code: '',
+            kpp: '',
+            inn: '',
+        },
+        methods: {
+            LoadXML() {
+                $("#loader").show();
+                axios.get('/XML/LoadXML/', {
+                }, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    }).then(response => {
+                        this.gridData = response.data.XMLList;
+                        //Разблокировка
+                        $("#loader").hide();
+                    }).catch(error => {
+                        $("#loader").hide();
+                        alert('Error');
+                        //Разблокировка
+                    });
+            },
+            movePages: function (amount) {
+                var newStartRow = this.startRow + (amount * this.rowsPerPage);
+                if (newStartRow >= 0 && newStartRow < gridData.length) {
+                    this.startRow = newStartRow;
+                }
+            }
+        },
+        filters: {
+            orderByBusinessRules: function (data) {
+                return data.slice().sort(function (a, b) {
+                    return a.power - b.power;
+                });
+            },
+
+        },
+        computed: {
+            filteredList: function () {
+                var filtredCatalog = this.gridData
+
+                if (this.code != '' && this.code != 0) {
+                    filtredCatalog = filtredCatalog.filter(el => el.Code != null && el.Code == this.code);
+                }
+
+                if (this.inn != '' && this.inn != 0) {
+                    filtredCatalog = filtredCatalog.filter(el => el.Inn != null && el.Inn == this.inn);
+                }
+
+                if (this.kpp != '' && this.kpp != 0) {
+                    filtredCatalog = filtredCatalog.filter(el => el.Kpp != null && el.Kpp == this.kpp);
+                }
+
+                return filtredCatalog;
+            },
+        }
+    })
+</script>

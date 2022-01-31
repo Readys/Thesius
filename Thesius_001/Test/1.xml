@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<nsiPurchaseMethod>
+  <body>
+    <item>
+      <guid>f4637d51-fa47-4076-9f3b-babf8d26a50f</guid>
+      <nsiPurchaseMethodData>
+        <createDateTime>2012-07-10T14:24:51.000+04:00</createDateTime>
+        <changeDateTime>2012-07-10T14:25:29.000+04:00</changeDateTime>
+        <startDateActive>2012-07-10+04:00</startDateActive>
+        <businessStatus>801</businessStatus>
+        <code>120</code>
+        <name>Открытый запрос предложений на право заключения договора</name>
+        <parentCode>0</parentCode>
+        <orderNumber>83</orderNumber>
+        <isElectronic>false</isElectronic>
+        <creator>
+          <fullName>ПУБЛИЧНОЕ АКЦИОНЕРНОЕ ОБЩЕСТВО "РОСТЕЛЕКОМ"</fullName>
+          <shortName>ПАО "РОСТЕЛЕКОМ"</shortName>
+          <inn>7707049388</inn>
+          <kpp>784201001</kpp>
+          <ogrn>1027700198767</ogrn>
+          <legalAddress>191167, Г. САНКТ-ПЕТЕРБУРГ,НАБ. СИНОПСКАЯ, дом Д. 14, корпус ЛИТЕРА А</legalAddress>
+          <postalAddress>115172, г Москва, р-н Таганский, ул Гончарная, дом 30</postalAddress>
+        </creator>
+        <extended>false</extended>
+        <competitive>false</competitive>
+        <protocols>
+          <controlledOrder>false</controlledOrder>
+          <protocol>
+            <code>27669</code>
+            <name>Протокол подведения итогов Закупки</name>
+          </protocol>
+          <protocol>
+            <code>1211</code>
+            <name>Протокол рассмотрения заявок</name>
+          </protocol>
+          <protocol>
+            <code>47902</code>
+            <name>Протокол отмены лота закупки</name>
+          </protocol>
+          <protocol>
+            <code>1217</code>
+            <name>Протокол основного этапа закупки (оценки и сопоставления заявок)</name>
+          </protocol>
+          <protocol>
+            <code>156</code>
+            <name>Протокол рассмотрения заявок</name>
+          </protocol>
+          <protocol>
+            <code>1208</code>
+            <name>Протокол вскрытия конвертов</name>
+          </protocol>
+        </protocols>
+        <hasPhases>false</hasPhases>
+        <typal>false</typal>
+        <lotOriented>false</lotOriented>
+      </nsiPurchaseMethodData>
+    </item>
+    <item>
+      <guid>bcf7b6eb-ed5a-46f6-b590-793ddf06d721</guid>
+      <nsiPurchaseMethodData>
+        <createDateTime>2012-07-10T14:55:42.000+04:00</createDateTime>
+        <changeDateTime>2012-07-10T14:55:42.000+04:00</changeDateTime>
+        <startDateActive>2012-07-10+04:00</startDateActive>
+        <businessStatus>866</businessStatus>
+        <code>121</code>
+        <name>Открытый конкурс</name>
+        <parentCode>0</parentCode>
+        <orderNumber>66</orderNumber>
+        <isElectronic>false</isElectronic>
+        <creator>
+          <fullName>ПУБЛИЧНОЕ АКЦИОНЕРНОЕ ОБЩЕСТВО "РОСТЕЛЕКОМ"</fullName>
+          <shortName>ПАО "РОСТЕЛЕКОМ"</shortName>
+          <inn>7707049388</inn>
+          <kpp>784201001</kpp>
+          <ogrn>1027700198767</ogrn>
+          <legalAddress>191167, Г. САНКТ-ПЕТЕРБУРГ,НАБ. СИНОПСКАЯ, дом Д. 14, корпус ЛИТЕРА А</legalAddress>
+          <postalAddress>115172, г Москва, р-н Таганский, ул Гончарная, дом 30</postalAddress>
+        </creator>
+        <extended>false</extended>
+        <competitive>false</competitive>
+        <protocols>
+          <controlledOrder>false</controlledOrder>
+        </protocols>
+        <hasPhases>false</hasPhases>
+        <typal>false</typal>
+        <lotOriented>false</lotOriented>
+      </nsiPurchaseMethodData>
+    </item>
+  </body>
+</nsiPurchaseMethod>
